@@ -23,8 +23,8 @@ public class SimpleGangWar : Script {
     private static readonly string[] pedsEnemies = { "BogdanGoon", "AvonGoon", "Blackops01SMY", "Blackops02SMY", "Blackops03SMY", "Marine03SMY", "Devinsec01SMY", "SecuroGuardMale01", "Armoured01SMM", "Armoured02SMM", "Armoured01", "ChemSec01SMM" };
     private static readonly string[] weaponsEnemies = { "CarbineRifle", "CarbineRifleMk2", "CombatMG", "CombatMGMk2", "PumpShotgunMk2", "PistolMk2", "RevolverMk2", "SMG", "SMGMk2", "CombatPDW" };*/
 
-	// Ballas (allies) vs Families (enemies)
-	/*private static readonly string[] pedsAllies = { "BallaEast01GMY", "BallaOrig01GMY", "Ballas01GFY", "BallaSout01GMY" };
+    // Ballas (allies) vs Families (enemies)
+    /*private static readonly string[] pedsAllies = { "BallaEast01GMY", "BallaOrig01GMY", "Ballas01GFY", "BallaSout01GMY" };
     private static readonly string[] weaponsAllies = { "AssaultRifle", "CompactRifle", "Gusenberg", "SNSPistol", "Pistol", "VintagePistol", "MachinePistol", "MicroSMG", "SMG" };
     private static readonly string[] pedsEnemies = { "Families01GFY", "Famca01GMY", "Famdnf01GMY", "Famfor01GMY" };
     private static readonly string[] weaponsEnemies = { "AssaultRifle", "CompactRifle", "Gusenberg", "SNSPistol", "Pistol", "VintagePistol", "MachinePistol", "MicroSMG", "SMG" };*/
@@ -110,25 +110,31 @@ public class SimpleGangWar : Script {
 
     private void OnKeyUp(object sender, KeyEventArgs e) {
         if (e.KeyCode == hotkey) {
-            if (stage == Stage.Initial) {
-                UI.ShowHelpMessage("Welcome to SimpleGangWar!\nGo to the enemy spawnpoint and press the hotkey again to define it.", 180000, true);
-                stage = Stage.DefiningEnemySpawnpoint;
-            } else if (stage == Stage.DefiningEnemySpawnpoint) {
-                DefineSpawnpoint(false);
-                UI.ShowHelpMessage("Enemy spawnpoint defined! Now go to the allied spawnpoint and press the hotkey again to define it.", 180000, true);
-                stage = Stage.EnemySpawnpointDefined;
-            } else if (stage == Stage.EnemySpawnpointDefined) {
-                DefineSpawnpoint(true);
-                SetupBattle();
-                UI.ShowHelpMessage("The battle begins NOW!", 5000, true);
-                stage = Stage.Running;
-            } else if (stage == Stage.Running) {
-                UI.ShowHelpMessage("Do you really want to stop the battle? Press the hotkey again to confirm.", 7000, true);
-                stage = Stage.StopKeyPressed;
-            } else if (stage == Stage.StopKeyPressed) {
-                UI.ShowHelpMessage("The battle has ended!", 5000, true);
-                stage = Stage.Initial;
-                Teardown();
+            switch (stage) {
+                case Stage.Initial:
+                    UI.ShowHelpMessage("Welcome to SimpleGangWar!\nGo to the enemy spawnpoint and press the hotkey again to define it.", 180000, true);
+                    stage = Stage.DefiningEnemySpawnpoint;
+                    break;
+                case stage.DefiningEnemySpawnpoint:
+                    DefineSpawnpoint(false);
+                    UI.ShowHelpMessage("Enemy spawnpoint defined! Now go to the allied spawnpoint and press the hotkey again to define it.", 180000, true);
+                    stage = Stage.EnemySpawnpointDefined;
+                    break;
+                case Stage.EnemySpawnpointDefined:
+                    DefineSpawnpoint(true);
+                    SetupBattle();
+                    UI.ShowHelpMessage("The battle begins NOW!", 5000, true);
+                    stage = Stage.Running;
+                    break;
+                case Stage.Running:
+                    UI.ShowHelpMessage("Do you really want to stop the battle? Press the hotkey again to confirm.", 7000, true);
+                    stage = Stage.StopKeyPressed;
+                    break;
+                case Stage.StopKeyPressed:
+                    UI.ShowHelpMessage("The battle has ended!", 5000, true);
+                    stage = Stage.Initial;
+                    Teardown();
+                    break;
             }
         }
     }

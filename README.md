@@ -36,6 +36,8 @@ The key `B` is used to navigate through all the steps of the script. In-game hel
 
 ## Changelog
 
+- 0.2.1
+	- Change if-else to switch in OnKeyUp
 - 0.1.1
 	- Add names to blips
 	- Set health & armor to peds of each team
