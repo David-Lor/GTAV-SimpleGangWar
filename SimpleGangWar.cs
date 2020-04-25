@@ -6,47 +6,37 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 
 public class SimpleGangWar : Script {
+    // Settings defined on script variables serve as fallback for settings not defined (or invalid) on .ini config file
 
     // Peds: https://github.com/crosire/scripthookvdotnet/blob/d1827497495567d810986aa752f8d903853088fd/source/scripting_v2/GTA.Native/PedHash.cs
     // Weapons: https://github.com/crosire/scripthookvdotnet/blob/d1827497495567d810986aa752f8d903853088fd/source/scripting_v2/GTA.Native/WeaponHash.cs
     // Peds with images (do not use the exact names listed here): https://wiki.gtanet.work/index.php/Peds - https://docs.fivem.net/docs/game-references/ped-models
+    private static string[] pedsAllies = { "Families01GFY", "Famca01GMY", "Famdnf01GMY", "Famfor01GMY" };
+    private static string[] weaponsAllies = { "AssaultRifle", "CompactRifle", "SNSPistol", "VintagePistol", "Pistol", "MicroSMG" };
+    private static string[] pedsEnemies = { "BallaEast01GMY", "BallaOrig01GMY", "Ballas01GFY", "BallaSout01GMY" };
+    private static string[] weaponsEnemies = { "MicroSMG", "MachinePistol", "Gusenberg", "Musket", "Pistol", "VintagePistol", "CompactRifle" };
+    private static readonly char[] StringSeparators = { ',', ';' };
 
-    // Families (allies) vs Ballas (enemies)
-    private static readonly string[] pedsAllies = { "Families01GFY", "Famca01GMY", "Famdnf01GMY", "Famfor01GMY" };
-    private static readonly string[] weaponsAllies = { "AssaultRifle", "CompactRifle", "SNSPistol", "VintagePistol", "Pistol", "MicroSMG" };
-    private static readonly string[] pedsEnemies = { "BallaEast01GMY", "BallaOrig01GMY", "Ballas01GFY", "BallaSout01GMY" };
-    private static readonly string[] weaponsEnemies = { "MicroSMG", "MachinePistol", "Gusenberg", "Musket", "Pistol", "VintagePistol", "CompactRifle" };
-    
-    // Misc gangs (allies) vs Misc security forces (enemies)
-    /*private static readonly string[] pedsAllies = { "Families01GFY", "Famca01GMY", "Famdnf01GMY", "Famfor01GMY", "BallaEast01GMY", "BallaOrig01GMY", "Ballas01GFY", "BallaSout01GMY", "Vagos01GFY", "Lost01GFY", "Lost01GMY", "Lost02GMY", "Lost03GMY" };
-    private static readonly string[] weaponsAllies = { "AssaultRifle", "CompactRifle", "Pistol", "SNSPistol", "VintagePistol", "MicroSMG", "MG", "MachinePistol" };
-    private static readonly string[] pedsEnemies = { "BogdanGoon", "AvonGoon", "Blackops01SMY", "Blackops02SMY", "Blackops03SMY", "Marine03SMY", "Devinsec01SMY", "SecuroGuardMale01", "Armoured01SMM", "Armoured02SMM", "Armoured01", "ChemSec01SMM" };
-    private static readonly string[] weaponsEnemies = { "CarbineRifle", "CarbineRifleMk2", "CombatMG", "CombatMGMk2", "PumpShotgunMk2", "PistolMk2", "RevolverMk2", "SMG", "SMGMk2", "CombatPDW" };*/
+    private static int healthAllies = 120;
+    private static int armorAllies = 0;
+    private static int healthEnemies = 120;
+    private static int armorEnemies = 0;
+    private static int accuracyAllies = 5;
+    private static int accuracyEnemies = 5;
+    private static CombatMovement combatMovementAllies = CombatMovement.Offensive;
+    private static CombatMovement combatMovementEnemies = CombatMovement.Offensive;
 
-    // Ballas (allies) vs Families (enemies)
-    /*private static readonly string[] pedsAllies = { "BallaEast01GMY", "BallaOrig01GMY", "Ballas01GFY", "BallaSout01GMY" };
-    private static readonly string[] weaponsAllies = { "AssaultRifle", "CompactRifle", "Gusenberg", "SNSPistol", "Pistol", "VintagePistol", "MachinePistol", "MicroSMG", "SMG" };
-    private static readonly string[] pedsEnemies = { "Families01GFY", "Famca01GMY", "Famdnf01GMY", "Famfor01GMY" };
-    private static readonly string[] weaponsEnemies = { "AssaultRifle", "CompactRifle", "Gusenberg", "SNSPistol", "Pistol", "VintagePistol", "MachinePistol", "MicroSMG", "SMG" };*/
+    private static int maxPedsPerTeam = 10;
+    private static Keys hotkey = Keys.B;
+    private static bool noWantedLevel = true;
+    private static bool showBlipsOnPeds = true;
+    private static bool dropWeaponOnDead = false;
+    private static bool removeDeadPeds = true;
+    private static bool runToSpawnpoint = true;
+    private static int idleInterval = 500;
+    private static int battleInterval = 100;
 
-    private static readonly int healthAllies = 120;
-    private static readonly int armorAllies = 0;
-    private static readonly int healthEnemies = 120;
-    private static readonly int armorEnemies = 0;
-    private static readonly int accuracyAllies = 5;
-    private static readonly int accuracyEnemies = 5;
-    private static readonly CombatMovement combatMovementAllies = CombatMovement.Offensive;
-    private static readonly CombatMovement combatMovementEnemies = CombatMovement.Offensive;
-
-    private static readonly int maxPedsPerTeam = 10;
-    private static readonly Keys hotkey = Keys.B;
-    private static readonly bool noWantedLevel = true;
-    private static readonly bool showBlipsOnPeds = true;
-    private static readonly bool dropWeaponOnDead = false;
-    private static readonly bool removeDeadPeds = true;
-    private static readonly bool runToSpawnpoint = true;
-    private static readonly int idleInterval = 500;
-    private static readonly int battleInterval = 100;
+    // From here, internal script variables - do not change!
 
     private int relationshipGroupAllies;
     private int relationshipGroupEnemies;
@@ -72,6 +62,12 @@ public class SimpleGangWar : Script {
         StopKeyPressed = 4
     }
 
+    private class SettingsHeader {
+        public static readonly string Allies = "ALLIED_TEAM";
+        public static readonly string Enemies = "ENEMY_TEAM";
+        public static readonly string General = "SETTINGS";
+    }
+
     private Stage stage = Stage.Initial;
     private Vector3 spawnpointAllies;
     private Vector3 spawnpointEnemies;
@@ -85,6 +81,45 @@ public class SimpleGangWar : Script {
         Tick += OnTick;
         KeyUp += OnKeyUp;
         Interval = idleInterval;
+
+        ScriptSettings config = ScriptSettings.Load("scripts\\SimpleGangWar.ini");
+        string configString;
+        
+        healthAllies = config.GetValue<int>(SettingsHeader.Allies, "Health", healthAllies);
+        healthEnemies = config.GetValue<int>(SettingsHeader.Enemies, "Health", healthEnemies);
+        
+        armorAllies = config.GetValue<int>(SettingsHeader.Allies, "Armor", armorAllies);
+        armorEnemies = config.GetValue<int>(SettingsHeader.Enemies, "Armor", armorEnemies);
+        
+        accuracyAllies = config.GetValue<int>(SettingsHeader.Allies, "Accuracy", accuracyAllies);
+        accuracyEnemies = config.GetValue<int>(SettingsHeader.Enemies, "Accuracy", accuracyEnemies);
+        
+        configString = config.GetValue<string>(SettingsHeader.Allies, "CombatMovement", "");
+        combatMovementAllies = EnumParse<CombatMovement>(configString, combatMovementAllies);
+        configString = config.GetValue<string>(SettingsHeader.Enemies, "CombatMovement", "");
+        combatMovementEnemies = EnumParse<CombatMovement>(configString, combatMovementEnemies);
+
+        configString = config.GetValue<string>(SettingsHeader.Allies, "Weapons", "");
+        weaponsAllies = ArrayParse(configString, weaponsAllies);
+        configString = config.GetValue<string>(SettingsHeader.Enemies, "Weapons", "");
+        weaponsEnemies = ArrayParse(configString, weaponsEnemies);
+
+        configString = config.GetValue<string>(SettingsHeader.Allies, "Models", "");
+        pedsAllies = ArrayParse(configString, pedsAllies);
+        configString = config.GetValue<string>(SettingsHeader.Enemies, "Models", "");
+        pedsEnemies = ArrayParse(configString, pedsEnemies);
+
+        configString = config.GetValue<string>(SettingsHeader.General, "Hotkey", "");
+        hotkey = EnumParse<Keys>(configString, hotkey);
+
+        maxPedsPerTeam = config.GetValue<int>(SettingsHeader.General, "MaxPedsPerTeam", maxPedsPerTeam);
+        noWantedLevel = config.GetValue<bool>(SettingsHeader.General, "NoWantedLevel", noWantedLevel);
+        showBlipsOnPeds = config.GetValue<bool>(SettingsHeader.General, "ShowBlipsOnPeds", showBlipsOnPeds);
+        dropWeaponOnDead = config.GetValue<bool>(SettingsHeader.General, "DropWeaponOnDead", dropWeaponOnDead);
+        removeDeadPeds = config.GetValue<bool>(SettingsHeader.General, "RemoveDeadPeds", removeDeadPeds);
+        runToSpawnpoint = config.GetValue<bool>(SettingsHeader.General, "RunToSpawnpoint", runToSpawnpoint);
+        idleInterval = config.GetValue<int>(SettingsHeader.General, "IdleInterval", idleInterval);
+        battleInterval = config.GetValue<int>(SettingsHeader.General, "BattleInterval", battleInterval);
 
         relationshipGroupAllies = World.AddRelationshipGroup("simplegangwar_allies");
         relationshipGroupEnemies = World.AddRelationshipGroup("simplegangwar_enemies");
@@ -100,11 +135,15 @@ public class SimpleGangWar : Script {
 
     private void OnTick(object sender, EventArgs e) {
         if (stage >= Stage.Running) {
-            SpawnPeds(true);
-            SpawnPeds(false);
-            
-            ProcessSpawnedPeds(true);
-            ProcessSpawnedPeds(false);
+            try {
+                SpawnPeds(true);
+                SpawnPeds(false);
+
+                ProcessSpawnedPeds(true);
+                ProcessSpawnedPeds(false);
+            } catch (FormatException exception) {
+                UI.ShowSubtitle("(SimpleGangWar) Error! " + exception.Message);
+            }
         }
     }
 
@@ -115,7 +154,7 @@ public class SimpleGangWar : Script {
                     UI.ShowHelpMessage("Welcome to SimpleGangWar!\nGo to the enemy spawnpoint and press the hotkey again to define it.", 180000, true);
                     stage = Stage.DefiningEnemySpawnpoint;
                     break;
-                case stage.DefiningEnemySpawnpoint:
+                case Stage.DefiningEnemySpawnpoint:
                     DefineSpawnpoint(false);
                     UI.ShowHelpMessage("Enemy spawnpoint defined! Now go to the allied spawnpoint and press the hotkey again to define it.", 180000, true);
                     stage = Stage.EnemySpawnpointDefined;
@@ -165,10 +204,10 @@ public class SimpleGangWar : Script {
         WeaponHash weaponGive;
 
         // TODO verify names from arrays on script startup
-        if (!Enum.TryParse<PedHash>(pedName, out pedSpawn)) {
+        if (!Enum.TryParse<PedHash>(pedName, true, out pedSpawn)) {
             throw new FormatException("Ped name " + pedName + " does not exist!");
         }
-        if (!Enum.TryParse<WeaponHash>(weaponName, out weaponGive)) {
+        if (!Enum.TryParse<WeaponHash>(weaponName, true, out weaponGive)) {
             throw new FormatException("Weapon name " + weaponName + " does not exist!");
         }
 
@@ -271,5 +310,17 @@ public class SimpleGangWar : Script {
 
     private T RandomChoice<T>(T[] array) {
         return array[random.Next(0, array.Length)];
+    }
+
+    private EnumType EnumParse<EnumType>(string enumKey, EnumType defaultValue) where EnumType : struct {
+        EnumType returnValue;
+        if (!Enum.TryParse<EnumType>(enumKey, true, out returnValue)) returnValue = defaultValue;
+        return returnValue;
+    }
+
+    private string[] ArrayParse(string stringInput, string[] defaultArray) {
+        string[] resultArray = stringInput.Replace(" ", string.Empty).Split(StringSeparators, StringSplitOptions.RemoveEmptyEntries);
+        if (resultArray.Length == 0) resultArray = defaultArray;
+        return resultArray;
     }
 }
