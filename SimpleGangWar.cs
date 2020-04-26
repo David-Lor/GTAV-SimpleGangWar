@@ -35,6 +35,8 @@ public class SimpleGangWar : Script {
     private static bool runToSpawnpoint = true;
     private static int idleInterval = 500;
     private static int battleInterval = 100;
+    private static int maxPedsAllies;
+    private static int maxPedsEnemies;
 
     // From here, internal script variables - do not change!
 
@@ -121,6 +123,9 @@ public class SimpleGangWar : Script {
         idleInterval = config.GetValue<int>(SettingsHeader.General, "IdleInterval", idleInterval);
         battleInterval = config.GetValue<int>(SettingsHeader.General, "BattleInterval", battleInterval);
 
+        maxPedsAllies = config.GetValue<int>(SettingsHeader.Allies, "MaxPeds", maxPedsPerTeam);
+        maxPedsEnemies = config.GetValue<int>(SettingsHeader.Enemies, "MaxPeds", maxPedsPerTeam);
+
         relationshipGroupAllies = World.AddRelationshipGroup("simplegangwar_allies");
         relationshipGroupEnemies = World.AddRelationshipGroup("simplegangwar_enemies");
         int relationshipGroupPlayer = Game.Player.Character.RelationshipGroup;
@@ -190,8 +195,9 @@ public class SimpleGangWar : Script {
 
     private void SpawnPeds(bool alliedTeam) {
         List<Ped> spawnedPedsList = alliedTeam ? spawnedAllies : spawnedEnemies;
+        int maxPeds = alliedTeam ? maxPedsAllies : maxPedsEnemies;
 
-        while (spawnedPedsList.Count < maxPedsPerTeam) {
+        while (spawnedPedsList.Count < maxPeds) {
             SpawnRandomPed(alliedTeam);
         }
     }
