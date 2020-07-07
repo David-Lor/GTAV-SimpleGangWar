@@ -41,11 +41,12 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 	- `offensive`: focus on attacking the enemy team
 	- `suicidal`: more aggresive attack
 	- _stationary & suicidal seem to take no effect, so is better to stick to just **defensive** and **offensive**_
+- `MaxPeds`: maximum alive peds on the team (if not specified, the MaxPedsPerTeam setting will be used)
 
 ## SETTINGS
 
 - `Hotkey`: the single hotkey used on the script ([Reference](https://docs.microsoft.com/en-us/dotnet/api/system.windows.input.key?view=netcore-3.1#fields))
-- `MaxPedsPerTeam`: maximum alive peds on each team (true/false)
+- `MaxPedsPerTeam`: maximum alive peds on each team - teams with the setting MaxPeds will ignore this option
 - `NoWantedLevel`: if true, disable wanted level during the battle (true/false)
 - `ShowBlipsOnPeds`: if true, each spawned ped will have a blip on the map (true/false)
 - `DropWeaponOnDead`: if false, dead peds won't drop their weapons - they will remain stick to their bodies (true/false)
@@ -66,6 +67,7 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 
 ## Changelog
 
+- 1.1.1 - Options to set ped limit per team
 - 1.0.1
 	- Support settings through .ini file
 	- Change if-else to switch in OnKeyUp
