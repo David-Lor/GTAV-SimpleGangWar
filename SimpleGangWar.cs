@@ -28,6 +28,7 @@ public class SimpleGangWar : Script {
 
     private static int maxPedsPerTeam = 10;
     private static Keys hotkey = Keys.B;
+    private static Keys spawnHotkey = Keys.N;
     private static bool noWantedLevel = true;
     private static bool showBlipsOnPeds = true;
     private static bool dropWeaponOnDead = false;
@@ -43,10 +44,23 @@ public class SimpleGangWar : Script {
     private int relationshipGroupAllies;
     private int relationshipGroupEnemies;
     private int originalWantedLevel;
+    
     private List<Ped> spawnedAllies = new List<Ped>();
     private List<Ped> spawnedEnemies = new List<Ped>();
     private List<Ped> deadPeds = new List<Ped>();
     private List<Ped> pedsRemove = new List<Ped>();
+
+	private bool spawnEnabled = true;
+    private Stage stage = Stage.Initial;
+
+    private Vector3 spawnpointAllies;
+    private Vector3 spawnpointEnemies;
+    private float spawnpointsDistance;
+
+    private Blip spawnpointBlipAllies;
+    private Blip spawnpointBlipEnemies;
+    
+    private static Random random = new Random();
 
     private enum CombatMovement {
         // https://runtime.fivem.net/doc/natives/?_0x4D9CA1009AFBD057
@@ -70,14 +84,6 @@ public class SimpleGangWar : Script {
         public static readonly string General = "SETTINGS";
     }
 
-    private Stage stage = Stage.Initial;
-    private Vector3 spawnpointAllies;
-    private Vector3 spawnpointEnemies;
-    private Blip spawnpointBlipAllies;
-    private Blip spawnpointBlipEnemies;
-    private float spawnpointsDistance;
-
-    private static Random random = new Random();
 
     public SimpleGangWar() {
         Tick += OnTick;
@@ -113,6 +119,8 @@ public class SimpleGangWar : Script {
 
         configString = config.GetValue<string>(SettingsHeader.General, "Hotkey", "");
         hotkey = EnumParse<Keys>(configString, hotkey);
+        configString = config.GetValue<string>(SettingsHeader.General, "SpawnHotkey", "");
+        spawnHotkey = EnumParse<Keys>(configString, spawnHotkey);
 
         maxPedsPerTeam = config.GetValue<int>(SettingsHeader.General, "MaxPedsPerTeam", maxPedsPerTeam);
         noWantedLevel = config.GetValue<bool>(SettingsHeader.General, "NoWantedLevel", noWantedLevel);
@@ -180,6 +188,10 @@ public class SimpleGangWar : Script {
                     Teardown();
                     break;
             }
+        } else if (e.KeyCode == spawnHotkey) {
+			spawnEnabled = !spawnEnabled;
+            BlinkSpawnpoint(true);
+            BlinkSpawnpoint(false);
         }
     }
 
@@ -197,7 +209,7 @@ public class SimpleGangWar : Script {
         List<Ped> spawnedPedsList = alliedTeam ? spawnedAllies : spawnedEnemies;
         int maxPeds = alliedTeam ? maxPedsAllies : maxPedsEnemies;
 
-        while (spawnedPedsList.Count < maxPeds) {
+        while (spawnEnabled && spawnedPedsList.Count < maxPeds) {
             SpawnRandomPed(alliedTeam);
         }
     }
@@ -285,6 +297,14 @@ public class SimpleGangWar : Script {
             blip.Color = BlipColor.Orange;
             blip.Name = "Enemy spawnpoint";
         }
+
+        BlinkSpawnpoint(alliedTeam);
+    }
+
+
+    private void BlinkSpawnpoint(bool alliedTeam) {
+        Blip blip = alliedTeam ? spawnpointBlipAllies : spawnpointBlipEnemies;
+        if (blip != null) blip.IsFlashing = !spawnEnabled;
     }
 
     private void TeardownPeds(List<Ped> pedList) {
