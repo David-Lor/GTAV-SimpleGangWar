@@ -43,6 +43,10 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 	- `offensive`: focus on attacking the enemy team
 	- `suicidal`: more aggresive attack
 	- _stationary & suicidal seem to take no effect, so is better to stick to just **defensive** and **offensive**_
+- `CombatRange`: how far or close the peds will fight against their enemies. This might not have a huge difference, depending on the scenario. One of following:
+	- `near`
+	- `medium`
+	- `far`
 - `MaxPeds`: maximum alive peds on the team (if not specified, the MaxPedsPerTeam setting will be used)
 
 ## SETTINGS
@@ -57,6 +61,10 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 - `RunToSpawnpoint`: if true, the peds task will be to run to their enemies' spawnpoint; if false, will be to fight hated targets on the area (true/false).
   The task RunTo (true) seems to have lower negative effect on peds behaviour (avoid them from being idle stuck - but it can still happen if spawnpoints are too far away).
   The task FightAgainstHatedTargets (false) can be interesting when spawnpoints are closer, as peds might have more freedom to flank the enemy?
+- `ProcessOtherRelationshipGroups`: if true, get all relationship groups from other existing peds and match these groups with the groups of SimpleGangWar peds.
+  Set it to true if you experience the spawned peds fighting against other peds (like mission peds) when they should not be (for example, enemy peds of a mission fighting against enemy peds of SimpleGangWar).
+- `IdleInterval`: delay between loop runs, when battle is not running, in ms
+- `BattleInterval`: delay between loop runs, when battle is running, in ms
 
 ## Known bugs
 
@@ -69,11 +77,16 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 - Add winning conditions
 - Smooth transition from battle end to cleanup (extra step?)
 - Add menu/more hotkeys to improve UX?
-- Respawn on ally spawnpoint after player dies
+- Respawn player on ally spawnpoint after dying
 - Organize data, settings, variables - for each teams on the script structurally (struct?)
 
 ## Changelog
 
+- 2.1.1
+	- Add CombatRange setting
+	- Add ProcessOtherRelationshipGroups setting
+	- Add IdleInterval & BattleInterval settings to .ini file (they were defined on the script but not documented on the .ini file)
+	- Add docstrings to the script functions
 - 2.0.1
 	- Pause/resume ped spawning in both teams
 	- Fix usage of default hotkeys when not specified in .ini file
