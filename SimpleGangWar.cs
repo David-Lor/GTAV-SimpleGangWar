@@ -55,7 +55,7 @@ public class SimpleGangWar : Script {
     private List<Ped> pedsRemove = new List<Ped>();
     private List<int> processedRelationshipGroups = new List<int>();
 
-	private bool spawnEnabled = true;
+    private bool spawnEnabled = true;
     private Stage stage = Stage.Initial;
 
     private Vector3 spawnpointAllies;
@@ -76,15 +76,15 @@ public class SimpleGangWar : Script {
         Stationary = 0,
         Defensive = 1,
         Offensive = 2,
-        Suicidal = 3
-        // TODO setting to randomize movement for each ped?
+        Suicidal = 3,
+        Random = 4
     }
 
     private enum CombatRange {
         Near = 0,
         Medium = 1,
-        Far = 2
-        // TODO setting to randomize range for each ped
+        Far = 2,
+        Random = 3
     }
 
     private enum Stage {
@@ -227,7 +227,7 @@ public class SimpleGangWar : Script {
                     break;
             }
         } else if (e.KeyCode == spawnHotkey) {
-			spawnEnabled = !spawnEnabled;
+            spawnEnabled = !spawnEnabled;
             BlinkSpawnpoint(true);
             BlinkSpawnpoint(false);
         }
@@ -252,16 +252,33 @@ public class SimpleGangWar : Script {
     /// </summary>
     /// <param name="alliedTeam">true=ally team / false=enemy team</param>
     private void SpawnPeds(bool alliedTeam) {
-        List<Ped> spawnedPedsList = alliedTeam ? spawnedAllies : spawnedEnemies;
-        int maxPeds = alliedTeam ? maxPedsAllies : maxPedsEnemies;
-
-        while (spawnEnabled && spawnedPedsList.Count < maxPeds) {
+        while (spawnEnabled && CanPedsSpawn(alliedTeam)) {
             SpawnRandomPed(alliedTeam);
         }
     }
 
+    private bool CanPedsSpawn(bool alliedTeam) {
+        List<Ped> spawnedPedsList = alliedTeam ? spawnedAllies : spawnedEnemies;
+        int maxPeds = alliedTeam ? maxPedsAllies : maxPedsEnemies;
+
+        if (spawnedPedsList.Count >= maxPeds) return false;
+
+        // TODO Variable to enable/disable spawnpoint validation
+        Vector3 pedPosition = alliedTeam ? spawnpointAllies : spawnpointEnemies;
+        // TODO Variable to set spawnpoint distance to get
+        Ped[] pedsNearSpawnpoint = World.GetNearbyPeds(pedPosition, 8.0f);
+        int pedsNearSpawnpointCount = 0;
+        
+        foreach (Ped ped in pedsNearSpawnpoint) {
+            if (ped.IsAlive && spawnedPedsList.Contains(ped)) pedsNearSpawnpointCount++;
+        }
+
+        // TODO Variable to set limit near spawnpoint
+        return pedsNearSpawnpointCount < 10;
+    }
+
     /// <summary>
-    /// Spawns a ped on the given team, ready to fight.
+    /// Spawns a ped on the given team, ready to fight, settings its attributes depending on the team configuration.
     /// </summary>
     /// <param name="alliedTeam">true=ally team / false=enemy team</param>
     /// <returns>The spawned ped</returns>
@@ -292,8 +309,14 @@ public class SimpleGangWar : Script {
 
         Function.Call(Hash.SET_PED_COMBAT_ATTRIBUTES, ped, 46, true);  // force peds to fight
         Function.Call(Hash.SET_PED_SEEING_RANGE, ped, spawnpointsDistance);
-        Function.Call(Hash.SET_PED_COMBAT_RANGE, ped, (int)(alliedTeam ? combatRangeAllies : combatRangeEnemies));
-        Function.Call(Hash.SET_PED_COMBAT_MOVEMENT, ped, (int)(alliedTeam ? combatMovementAllies : combatMovementEnemies));
+        
+		int combatRange = alliedTeam ? (int)combatRangeAllies : (int)combatRangeEnemies;
+		combatRange = combatRange != (int)CombatRange.Random ? combatRange : random.Next(0, 3);
+		Function.Call(Hash.SET_PED_COMBAT_RANGE, ped, combatRange);
+
+		int combatMovement = alliedTeam ? (int)combatMovementAllies : (int)combatMovementEnemies;
+		combatMovement = combatMovement != (int)CombatMovement.Random ? combatMovement : random.Next(1, 3);
+        Function.Call(Hash.SET_PED_COMBAT_MOVEMENT, ped, combatMovement);
 
         if (showBlipsOnPeds) {
             Blip blip = ped.AddBlip();
