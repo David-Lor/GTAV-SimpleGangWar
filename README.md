@@ -49,7 +49,7 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 	- `far`
 - `MaxPeds`: maximum alive peds on the team (if not specified, the MaxPedsPerTeam setting will be used)
 
-## SETTINGS
+### SETTINGS
 
 - `Hotkey`: the single hotkey used to iterate over the script stages ([Reference](https://docs.microsoft.com/en-us/dotnet/api/system.windows.input.key?view=netcore-3.1#fields))
 - `SpawnHotkey`: hotkey used to pause/resume ped spawn in both teams ([Reference](https://docs.microsoft.com/en-us/dotnet/api/system.windows.input.key?view=netcore-3.1#fields))
