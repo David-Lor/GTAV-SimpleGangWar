@@ -252,12 +252,20 @@ public class SimpleGangWar : Script {
     /// </summary>
     /// <param name="alliedTeam">true=ally team / false=enemy team</param>
     private void SpawnPeds(bool alliedTeam) {
+        while (spawnEnabled && CanPedsSpawn(alliedTeam)) {
+            SpawnRandomPed(alliedTeam);
+        }
+    }
+
+    /// <summary>
+    /// Determine if peds on the given team should spawn or not.
+    /// </summary>
+    /// <param name="alliedTeam">true=ally team / false=enemy team</param>
+    private bool CanPedsSpawn(bool alliedTeam) {
         List<Ped> spawnedPedsList = alliedTeam ? spawnedAllies : spawnedEnemies;
         int maxPeds = alliedTeam ? maxPedsAllies : maxPedsEnemies;
 
-        while (spawnEnabled && spawnedPedsList.Count < maxPeds) {
-            SpawnRandomPed(alliedTeam);
-        }
+        return spawnedPedsList.Count < maxPeds;
     }
 
     /// <summary>
