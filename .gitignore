@@ -4,3 +4,5 @@ obj/
 *.csproj
 *.config
 *.sln
+.idea/
+.vscode/

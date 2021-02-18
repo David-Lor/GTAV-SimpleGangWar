@@ -165,6 +165,7 @@ public class SimpleGangWar : Script {
         SetRelationshipBetweenGroups(Relationship.Respect, relationshipGroupEnemies, relationshipGroupEnemies);
         SetRelationshipBetweenGroups(Relationship.Respect, relationshipGroupAllies, relationshipGroupPlayer);
         SetRelationshipBetweenGroups(Relationship.Hate, relationshipGroupEnemies, relationshipGroupPlayer);
+        // TODO processedRelationshipGroups not being used?
         processedRelationshipGroups.Add(relationshipGroupPlayer);
         processedRelationshipGroups.Add(relationshipGroupAllies);
         processedRelationshipGroups.Add(relationshipGroupEnemies);
@@ -315,7 +316,7 @@ public class SimpleGangWar : Script {
 		Function.Call(Hash.SET_PED_COMBAT_RANGE, ped, combatRange);
 
 		int combatMovement = alliedTeam ? (int)combatMovementAllies : (int)combatMovementEnemies;
-		combatMovement = combatMovement != (int)CombatMovement.Random ? combatMovement : random.Next(1, 3);
+		combatMovement = combatMovement != (int)CombatMovement.Random ? combatMovement : random.Next(1, 2); // TODO Suicidal?
         Function.Call(Hash.SET_PED_COMBAT_MOVEMENT, ped, combatMovement);
 
         if (showBlipsOnPeds) {
