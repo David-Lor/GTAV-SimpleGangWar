@@ -304,7 +304,7 @@ public class SimpleGangWar : Script {
         }
 
         ped.Task.ClearAllImmediately();
-        ped.AlwaysKeepTask = true;
+        ped.AlwaysKeepTask = true;  // TODO Investigate if this could be making peds avoid reloads
         (alliedTeam ? spawnedAllies : spawnedEnemies).Add(ped);
 
         return ped;

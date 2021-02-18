@@ -70,6 +70,7 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 
 - If spawnpoints are too far away from each other, peds can idle and do nothing
 - When using [Watch Your Death](https://gta5-mods.com/scripts/watch-your-death), while player is dead, enemies can run to ally spawnpoint without fighting, or be idle
+- Peds can avoid reloads (this is mostly noticeable with muskets)
 
 ## TODO
 
