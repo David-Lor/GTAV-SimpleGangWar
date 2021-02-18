@@ -55,7 +55,7 @@ public class SimpleGangWar : Script {
     private List<Ped> pedsRemove = new List<Ped>();
     private List<int> processedRelationshipGroups = new List<int>();
 
-	private bool spawnEnabled = true;
+    private bool spawnEnabled = true;
     private Stage stage = Stage.Initial;
 
     private Vector3 spawnpointAllies;
@@ -165,6 +165,7 @@ public class SimpleGangWar : Script {
         SetRelationshipBetweenGroups(Relationship.Respect, relationshipGroupEnemies, relationshipGroupEnemies);
         SetRelationshipBetweenGroups(Relationship.Respect, relationshipGroupAllies, relationshipGroupPlayer);
         SetRelationshipBetweenGroups(Relationship.Hate, relationshipGroupEnemies, relationshipGroupPlayer);
+        // TODO processedRelationshipGroups not being used?
         processedRelationshipGroups.Add(relationshipGroupPlayer);
         processedRelationshipGroups.Add(relationshipGroupAllies);
         processedRelationshipGroups.Add(relationshipGroupEnemies);
@@ -227,7 +228,7 @@ public class SimpleGangWar : Script {
                     break;
             }
         } else if (e.KeyCode == spawnHotkey) {
-			spawnEnabled = !spawnEnabled;
+            spawnEnabled = !spawnEnabled;
             BlinkSpawnpoint(true);
             BlinkSpawnpoint(false);
         }
