@@ -37,19 +37,22 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 - `Health`: health for peds (should not be least than 100)
 - `Armor`: armor for peds (from 0)
 - `Accuracy`: accuracy for peds (from 0)
-- `CombatMovement`: how the peds will move through the battlefield. This can be used to make one team defend its spawnpoint, while the other team tries to attack it. One of following:
+- `CombatMovement`: how the peds will move through the battlefield. This can be used to make one team defend its spawnpoint, while the other team tries to attack it. If RunToSpawnpoint=true, this setting most probably will be ignored. One of following:
 	- `stationary`: not move at all
 	- `defensive`: stay near the spawnpoint and take cover
 	- `offensive`: focus on attacking the enemy team
 	- `suicidal`: more aggresive attack
-	- _stationary & suicidal seem to take no effect, so is better to stick to just **defensive** and **offensive**_
+	- `disabled`: do not alter this setting on peds
+	- `random`: randomize between `defensive` and `offensive` for each spawned ped. This does not always work as expected, since some peds can be stuck on the spawnpoint waiting for other peds to attack, but since they are defending their position, nobody would attack
 - `CombatRange`: how far or close the peds will fight against their enemies. This might not have a huge difference, depending on the scenario. One of following:
 	- `near`
 	- `medium`
 	- `far`
+	- `disabled`: do not alter this setting on peds
+	- `random`: randomize between `near`, `medium`, `far` for each spawned ped
 - `MaxPeds`: maximum alive peds on the team (if not specified, the MaxPedsPerTeam setting will be used)
 
-## SETTINGS
+### SETTINGS
 
 - `Hotkey`: the single hotkey used to iterate over the script stages ([Reference](https://docs.microsoft.com/en-us/dotnet/api/system.windows.input.key?view=netcore-3.1#fields))
 - `SpawnHotkey`: hotkey used to pause/resume ped spawn in both teams ([Reference](https://docs.microsoft.com/en-us/dotnet/api/system.windows.input.key?view=netcore-3.1#fields))
@@ -63,6 +66,8 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
   The task FightAgainstHatedTargets (false) can be interesting when spawnpoints are closer, as peds might have more freedom to flank the enemy?
 - `ProcessOtherRelationshipGroups`: if true, get all relationship groups from other existing peds and match these groups with the groups of SimpleGangWar peds.
   Set it to true if you experience the spawned peds fighting against other peds (like mission peds) when they should not be (for example, enemy peds of a mission fighting against enemy peds of SimpleGangWar).
+- `SpawnpointFloodLimitPeds`: limit how many peds can be near its spawnpoint. If more than this quantity of peds are near the spawnpoint, no more peds on the team will spawn. Disable this feature by setting this variable to `0`.
+- `SpawnpointFloodLimitDistance`: in-game distance from a team spawnpoint to keep track of the SpawnpointFloodLimitPeds. Can be integer or decimal (if using decimals, use dot or comma depending on your system regional settings)
 - `IdleInterval`: delay between loop runs, when battle is not running, in ms
 - `BattleInterval`: delay between loop runs, when battle is running, in ms
 
@@ -70,6 +75,7 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 
 - If spawnpoints are too far away from each other, peds can idle and do nothing
 - When using [Watch Your Death](https://gta5-mods.com/scripts/watch-your-death), while player is dead, enemies can run to ally spawnpoint without fighting, or be idle
+- Peds can avoid reloads (this is mostly noticeable with muskets)
 
 ## TODO
 
@@ -82,6 +88,10 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 
 ## Changelog
 
+- 2.2.1
+	- Add spawnpoint anti-flood feature (avoid peds from flooding their spawnpoints)
+	- Add options to randomize CombatMovement & CombatRange
+	- Add options to disable altering CombatMovement & CombatRange
 - 2.1.1
 	- Add CombatRange setting
 	- Add ProcessOtherRelationshipGroups setting
