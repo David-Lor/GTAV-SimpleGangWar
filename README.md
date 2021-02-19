@@ -37,16 +37,18 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 - `Health`: health for peds (should not be least than 100)
 - `Armor`: armor for peds (from 0)
 - `Accuracy`: accuracy for peds (from 0)
-- `CombatMovement`: how the peds will move through the battlefield. This can be used to make one team defend its spawnpoint, while the other team tries to attack it. One of following:
+- `CombatMovement`: how the peds will move through the battlefield. This can be used to make one team defend its spawnpoint, while the other team tries to attack it. If RunToSpawnpoint=true, this setting most probably will be ignored. One of following:
 	- `stationary`: not move at all
 	- `defensive`: stay near the spawnpoint and take cover
 	- `offensive`: focus on attacking the enemy team
 	- `suicidal`: more aggresive attack
+	- `random`: randomize between `defensive` and `offensive` for each spawned ped. This does not always work as expected, since some peds can be stuck on the spawnpoint waiting for other peds to attack, but since they are defending their position, nobody would attack
 	- _stationary & suicidal seem to take no effect, so is better to stick to just **defensive** and **offensive**_
 - `CombatRange`: how far or close the peds will fight against their enemies. This might not have a huge difference, depending on the scenario. One of following:
 	- `near`
 	- `medium`
 	- `far`
+	- `random`: randomize between `near`, `medium`, `far` for each spawned ped
 - `MaxPeds`: maximum alive peds on the team (if not specified, the MaxPedsPerTeam setting will be used)
 
 ### SETTINGS
@@ -70,6 +72,7 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 
 - If spawnpoints are too far away from each other, peds can idle and do nothing
 - When using [Watch Your Death](https://gta5-mods.com/scripts/watch-your-death), while player is dead, enemies can run to ally spawnpoint without fighting, or be idle
+- Peds can avoid reloads (this is mostly noticeable with muskets)
 
 ## TODO
 
@@ -82,6 +85,8 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 
 ## Changelog
 
+- 2.2.1
+	- Add options to randomize CombatMovement & CombatRange
 - 2.1.1
 	- Add CombatRange setting
 	- Add ProcessOtherRelationshipGroups setting

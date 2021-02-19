@@ -55,7 +55,7 @@ public class SimpleGangWar : Script {
     private List<Ped> pedsRemove = new List<Ped>();
     private List<int> processedRelationshipGroups = new List<int>();
 
-	private bool spawnEnabled = true;
+    private bool spawnEnabled = true;
     private Stage stage = Stage.Initial;
 
     private Vector3 spawnpointAllies;
@@ -73,19 +73,23 @@ public class SimpleGangWar : Script {
 
     private enum CombatMovement {
         // https://runtime.fivem.net/doc/natives/?_0x4D9CA1009AFBD057
+        // NOTE Stationary, Suicidal - do not seem to work as expected
         Stationary = 0,
         Defensive = 1,
         Offensive = 2,
-        Suicidal = 3
-        // TODO setting to randomize movement for each ped?
+        Suicidal = 3,
+        Random = -1
     }
+    private static CombatMovement[] randomizableCombatMovements = { CombatMovement.Defensive, CombatMovement.Offensive };
 
     private enum CombatRange {
+        // https://docs.fivem.net/natives/?_0x3C606747B23E497B
         Near = 0,
         Medium = 1,
-        Far = 2
-        // TODO setting to randomize range for each ped
+        Far = 2,
+        Random = -1
     }
+    private static CombatRange[] randomizableCombatRanges = { CombatRange.Near, CombatRange.Medium, CombatRange.Far };
 
     private enum Stage {
         Initial = 0,
@@ -165,6 +169,7 @@ public class SimpleGangWar : Script {
         SetRelationshipBetweenGroups(Relationship.Respect, relationshipGroupEnemies, relationshipGroupEnemies);
         SetRelationshipBetweenGroups(Relationship.Respect, relationshipGroupAllies, relationshipGroupPlayer);
         SetRelationshipBetweenGroups(Relationship.Hate, relationshipGroupEnemies, relationshipGroupPlayer);
+        // TODO processedRelationshipGroups not being used?
         processedRelationshipGroups.Add(relationshipGroupPlayer);
         processedRelationshipGroups.Add(relationshipGroupAllies);
         processedRelationshipGroups.Add(relationshipGroupEnemies);
@@ -227,7 +232,7 @@ public class SimpleGangWar : Script {
                     break;
             }
         } else if (e.KeyCode == spawnHotkey) {
-			spawnEnabled = !spawnEnabled;
+            spawnEnabled = !spawnEnabled;
             BlinkSpawnpoint(true);
             BlinkSpawnpoint(false);
         }
@@ -290,6 +295,14 @@ public class SimpleGangWar : Script {
         ped.RelationshipGroup = alliedTeam ? relationshipGroupAllies : relationshipGroupEnemies;
         ped.DropsWeaponsOnDeath = dropWeaponOnDead;
 
+        CombatRange combatRange = alliedTeam ? combatRangeAllies : combatRangeEnemies;
+        if (combatRange == CombatRange.Random) combatRange = RandomChoice(randomizableCombatRanges);
+        Function.Call(Hash.SET_PED_COMBAT_RANGE, ped, (int)combatRange);
+
+        CombatMovement combatMovement = alliedTeam ? combatMovementAllies : combatMovementEnemies;
+        if (combatMovement == CombatMovement.Random) combatMovement = RandomChoice(randomizableCombatMovements);
+        Function.Call(Hash.SET_PED_COMBAT_MOVEMENT, ped, (int)combatMovement);
+
         Function.Call(Hash.SET_PED_COMBAT_ATTRIBUTES, ped, 46, true);  // force peds to fight
         Function.Call(Hash.SET_PED_SEEING_RANGE, ped, spawnpointsDistance);
         Function.Call(Hash.SET_PED_COMBAT_RANGE, ped, (int)(alliedTeam ? combatRangeAllies : combatRangeEnemies));
@@ -303,7 +316,7 @@ public class SimpleGangWar : Script {
         }
 
         ped.Task.ClearAllImmediately();
-        ped.AlwaysKeepTask = true;
+        ped.AlwaysKeepTask = true;  // TODO Investigate if this could be making peds avoid reloads
         (alliedTeam ? spawnedAllies : spawnedEnemies).Add(ped);
 
         return ped;
