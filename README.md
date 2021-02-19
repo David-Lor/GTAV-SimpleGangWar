@@ -66,7 +66,7 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 - `ProcessOtherRelationshipGroups`: if true, get all relationship groups from other existing peds and match these groups with the groups of SimpleGangWar peds.
   Set it to true if you experience the spawned peds fighting against other peds (like mission peds) when they should not be (for example, enemy peds of a mission fighting against enemy peds of SimpleGangWar).
 - `SpawnpointFloodLimitPeds`: limit how many peds can be near its spawnpoint. If more than this quantity of peds are near the spawnpoint, no more peds on the team will spawn. Disable this feature by setting this variable to `0`.
-- `SpawnpointFloodLimitDistance`: in-game distance from a team spawnpoint to keep track of the SpawnpointFloodLimitPeds.
+- `SpawnpointFloodLimitDistance`: in-game distance from a team spawnpoint to keep track of the SpawnpointFloodLimitPeds. Can be integer or decimal (if using decimals, use dot or comma depending on your system regional settings)
 - `IdleInterval`: delay between loop runs, when battle is not running, in ms
 - `BattleInterval`: delay between loop runs, when battle is running, in ms
 
