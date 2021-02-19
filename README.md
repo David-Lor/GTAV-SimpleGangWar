@@ -42,12 +42,13 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 	- `defensive`: stay near the spawnpoint and take cover
 	- `offensive`: focus on attacking the enemy team
 	- `suicidal`: more aggresive attack
+	- `disabled`: do not alter this setting on peds
 	- `random`: randomize between `defensive` and `offensive` for each spawned ped. This does not always work as expected, since some peds can be stuck on the spawnpoint waiting for other peds to attack, but since they are defending their position, nobody would attack
-	- _stationary & suicidal seem to take no effect, so is better to stick to just **defensive** and **offensive**_
 - `CombatRange`: how far or close the peds will fight against their enemies. This might not have a huge difference, depending on the scenario. One of following:
 	- `near`
 	- `medium`
 	- `far`
+	- `disabled`: do not alter this setting on peds
 	- `random`: randomize between `near`, `medium`, `far` for each spawned ped
 - `MaxPeds`: maximum alive peds on the team (if not specified, the MaxPedsPerTeam setting will be used)
 
@@ -90,6 +91,7 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 - 2.2.1
 	- Add spawnpoint anti-flood feature (avoid peds from flooding their spawnpoints)
 	- Add options to randomize CombatMovement & CombatRange
+	- Add options to disable altering CombatMovement & CombatRange
 - 2.1.1
 	- Add CombatRange setting
 	- Add ProcessOtherRelationshipGroups setting

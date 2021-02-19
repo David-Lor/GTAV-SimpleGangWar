@@ -80,6 +80,7 @@ public class SimpleGangWar : Script {
         Defensive = 1,
         Offensive = 2,
         Suicidal = 3,
+        Disabled = 0,
         Random = -1
     }
     private static CombatMovement[] randomizableCombatMovements = { CombatMovement.Defensive, CombatMovement.Offensive };
@@ -89,6 +90,7 @@ public class SimpleGangWar : Script {
         Near = 0,
         Medium = 1,
         Far = 2,
+        Disabled = 0,
         Random = -1
     }
     private static CombatRange[] randomizableCombatRanges = { CombatRange.Near, CombatRange.Medium, CombatRange.Far };
@@ -322,12 +324,16 @@ public class SimpleGangWar : Script {
         ped.DropsWeaponsOnDeath = dropWeaponOnDead;
 
         CombatRange combatRange = alliedTeam ? combatRangeAllies : combatRangeEnemies;
-        if (combatRange == CombatRange.Random) combatRange = RandomChoice(randomizableCombatRanges);
-        Function.Call(Hash.SET_PED_COMBAT_RANGE, ped, (int)combatRange);
+        if (combatRange != CombatRange.Disabled) {
+            if (combatRange == CombatRange.Random) combatRange = RandomChoice(randomizableCombatRanges);
+            Function.Call(Hash.SET_PED_COMBAT_RANGE, ped, (int)combatRange);
+        }
 
         CombatMovement combatMovement = alliedTeam ? combatMovementAllies : combatMovementEnemies;
-        if (combatMovement == CombatMovement.Random) combatMovement = RandomChoice(randomizableCombatMovements);
-        Function.Call(Hash.SET_PED_COMBAT_MOVEMENT, ped, (int)combatMovement);
+        if (combatMovement != CombatMovement.Disabled) {
+            if (combatMovement == CombatMovement.Random) combatMovement = RandomChoice(randomizableCombatMovements);
+            Function.Call(Hash.SET_PED_COMBAT_MOVEMENT, ped, (int)combatMovement);
+        }
 
         Function.Call(Hash.SET_PED_COMBAT_ATTRIBUTES, ped, 46, true);  // force peds to fight
         Function.Call(Hash.SET_PED_SEEING_RANGE, ped, spawnpointsDistance);
