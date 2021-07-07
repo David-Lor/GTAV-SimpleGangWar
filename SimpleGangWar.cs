@@ -44,12 +44,17 @@ public class SimpleGangWar : Script {
     private static int battleInterval = 100;
     private static int maxPedsAllies;
     private static int maxPedsEnemies;
+    private static int maxSpawnPedsAllies = -1;
+    private static int maxSpawnPedsEnemies = -1;
 
     // From here, internal script variables - do not change!
 
     private int relationshipGroupAllies;
     private int relationshipGroupEnemies;
     private int originalWantedLevel;
+
+    private int spawnedAlliesCounter;
+    private int spawnedEnemiesCounter;
     
     private List<Ped> spawnedAllies = new List<Ped>();
     private List<Ped> spawnedEnemies = new List<Ped>();
@@ -166,6 +171,8 @@ public class SimpleGangWar : Script {
 
         maxPedsAllies = config.GetValue(SettingsHeader.Allies, "MaxPeds", maxPedsPerTeam);
         maxPedsEnemies = config.GetValue(SettingsHeader.Enemies, "MaxPeds", maxPedsPerTeam);
+        maxSpawnPedsAllies = config.GetValue(SettingsHeader.Allies, "MaxSpawnPeds", maxSpawnPedsAllies);
+        maxSpawnPedsEnemies = config.GetValue(SettingsHeader.Enemies, "MaxSpawnPeds", maxSpawnPedsEnemies);
 
         relationshipGroupAllies = World.AddRelationshipGroup("simplegangwar_allies");
         relationshipGroupEnemies = World.AddRelationshipGroup("simplegangwar_enemies");
@@ -251,6 +258,8 @@ public class SimpleGangWar : Script {
     private void SetupBattle() {
         Interval = battleInterval;
         spawnpointsDistance = spawnpointEnemies.DistanceTo(spawnpointAllies);
+        spawnedAlliesCounter = 0;
+        spawnedEnemiesCounter = 0;
 
         if (noWantedLevel) {
             originalWantedLevel = Game.MaxWantedLevel;
@@ -275,9 +284,14 @@ public class SimpleGangWar : Script {
     private bool CanPedsSpawn(bool alliedTeam) {
         List<Ped> spawnedPedsList = alliedTeam ? spawnedAllies : spawnedEnemies;
         int maxPeds = alliedTeam ? maxPedsAllies : maxPedsEnemies;
+        int maxSpawnPeds = alliedTeam ? maxSpawnPedsAllies : maxSpawnPedsEnemies;
+        int totalSpawnedPeds = alliedTeam ? spawnedAlliesCounter : spawnedEnemiesCounter;
 
         // by MaxPeds in the team
         if (spawnedPedsList.Count >= maxPeds) return false;
+
+        // by MaxSpawnPeds limit
+        if (maxSpawnPeds >= 0 && totalSpawnedPeds > maxSpawnPeds) return false;
 
         // by SpawnpointFlood limit
         if (spawnpointFloodLimitPeds < 1) return true;
@@ -349,7 +363,14 @@ public class SimpleGangWar : Script {
 
         ped.Task.ClearAllImmediately();
         ped.AlwaysKeepTask = true;  // TODO Investigate if this could be making peds avoid reloads
-        (alliedTeam ? spawnedAllies : spawnedEnemies).Add(ped);
+
+        if (alliedTeam) {
+            spawnedAllies.Add(ped);
+            spawnedAlliesCounter++;
+        } else {
+            spawnedEnemies.Add(ped);
+            spawnedEnemiesCounter++;
+        }
 
         return ped;
     }

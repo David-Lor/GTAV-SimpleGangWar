@@ -50,7 +50,8 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 	- `far`
 	- `disabled`: do not alter this setting on peds
 	- `random`: randomize between `near`, `medium`, `far` for each spawned ped
-- `MaxPeds`: maximum alive peds on the team (if not specified, the MaxPedsPerTeam setting will be used)
+- `MaxPeds`: maximum alive peds on the team at the same time (if not specified, the MaxPedsPerTeam setting will be used).
+- `MaxSpawnPeds`: limit of peds that will spawn. When the limit is reached, no more peds on the team will spawn on the current battle. Can be disabled by removing the setting or setting it to -1.
 
 ### SETTINGS
 
@@ -88,6 +89,8 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 
 ## Changelog
 
+- 2.3.1
+	- Add option to limit how many peds spawn per team
 - 2.2.1
 	- Add spawnpoint anti-flood feature (avoid peds from flooding their spawnpoints)
 	- Add options to randomize CombatMovement & CombatRange
