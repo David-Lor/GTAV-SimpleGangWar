@@ -45,12 +45,17 @@ public class SimpleGangWar : Script {
     private static int battleInterval = 100;
     private static int maxPedsAllies;
     private static int maxPedsEnemies;
+    private static int maxSpawnPedsAllies = -1;
+    private static int maxSpawnPedsEnemies = -1;
 
     // From here, internal script variables - do not change!
 
     private int relationshipGroupAllies;
     private int relationshipGroupEnemies;
     private int originalWantedLevel;
+
+    private int spawnedAlliesCounter;
+    private int spawnedEnemiesCounter;
     
     private List<Ped> spawnedAllies = new List<Ped>();
     private List<Ped> spawnedEnemies = new List<Ped>();
@@ -118,25 +123,25 @@ public class SimpleGangWar : Script {
 
         ScriptSettings config = ScriptSettings.Load("scripts\\SimpleGangWar.ini");
         string configString;
-        
-        healthAllies = config.GetValue<int>(SettingsHeader.Allies, "Health", healthAllies);
-        healthEnemies = config.GetValue<int>(SettingsHeader.Enemies, "Health", healthEnemies);
-        
-        armorAllies = config.GetValue<int>(SettingsHeader.Allies, "Armor", armorAllies);
-        armorEnemies = config.GetValue<int>(SettingsHeader.Enemies, "Armor", armorEnemies);
-        
-        accuracyAllies = config.GetValue<int>(SettingsHeader.Allies, "Accuracy", accuracyAllies);
-        accuracyEnemies = config.GetValue<int>(SettingsHeader.Enemies, "Accuracy", accuracyEnemies);
+
+        healthAllies = config.GetValue(SettingsHeader.Allies, "Health", healthAllies);
+        healthEnemies = config.GetValue(SettingsHeader.Enemies, "Health", healthEnemies);
+
+        armorAllies = config.GetValue(SettingsHeader.Allies, "Armor", armorAllies);
+        armorEnemies = config.GetValue(SettingsHeader.Enemies, "Armor", armorEnemies);
+
+        accuracyAllies = config.GetValue(SettingsHeader.Allies, "Accuracy", accuracyAllies);
+        accuracyEnemies = config.GetValue(SettingsHeader.Enemies, "Accuracy", accuracyEnemies);
         
         configString = config.GetValue<string>(SettingsHeader.Allies, "CombatMovement", "");
-        combatMovementAllies = EnumParse<CombatMovement>(configString, combatMovementAllies);
+        combatMovementAllies = EnumParse(configString, combatMovementAllies);
         configString = config.GetValue<string>(SettingsHeader.Enemies, "CombatMovement", "");
-        combatMovementEnemies = EnumParse<CombatMovement>(configString, combatMovementEnemies);
+        combatMovementEnemies = EnumParse(configString, combatMovementEnemies);
 
         configString = config.GetValue<string>(SettingsHeader.Allies, "CombatRange", "");
-        combatRangeAllies = EnumParse<CombatRange>(configString, combatRangeAllies);
+        combatRangeAllies = EnumParse(configString, combatRangeAllies);
         configString = config.GetValue<string>(SettingsHeader.Enemies, "CombatRange", "");
-        combatRangeEnemies = EnumParse<CombatRange>(configString, combatRangeEnemies);
+        combatRangeEnemies = EnumParse(configString, combatRangeEnemies);
 
         configString = config.GetValue<string>(SettingsHeader.Allies, "Weapons", "");
         weaponsAllies = ArrayParse(configString, weaponsAllies);
@@ -149,25 +154,27 @@ public class SimpleGangWar : Script {
         pedsEnemies = ArrayParse(configString, pedsEnemies);
 
         configString = config.GetValue<string>(SettingsHeader.General, "Hotkey", "");
-        hotkey = EnumParse<Keys>(configString, hotkey);
+        hotkey = EnumParse(configString, hotkey);
         configString = config.GetValue<string>(SettingsHeader.General, "SpawnHotkey", "");
-        spawnHotkey = EnumParse<Keys>(configString, spawnHotkey);
+        spawnHotkey = EnumParse(configString, spawnHotkey);
 
-        maxPedsPerTeam = config.GetValue<int>(SettingsHeader.General, "MaxPedsPerTeam", maxPedsPerTeam);
-        noWantedLevel = config.GetValue<bool>(SettingsHeader.General, "NoWantedLevel", noWantedLevel);
-        showBlipsOnPeds = config.GetValue<bool>(SettingsHeader.General, "ShowBlipsOnPeds", showBlipsOnPeds);
-        dropWeaponOnDead = config.GetValue<bool>(SettingsHeader.General, "DropWeaponOnDead", dropWeaponOnDead);
-        removeDeadPeds = config.GetValue<bool>(SettingsHeader.General, "RemoveDeadPeds", removeDeadPeds);
-        runToSpawnpoint = config.GetValue<bool>(SettingsHeader.General, "RunToSpawnpoint", runToSpawnpoint);
-        processOtherRelationshipGroups = config.GetValue<bool>(SettingsHeader.General, "ProcessOtherRelationshipGroups", processOtherRelationshipGroups);
-        neutralPlayer = config.GetValue<bool>(SettingsHeader.General, "NeutralPlayer", neutralPlayer);
-        spawnpointFloodLimitPeds = config.GetValue<int>(SettingsHeader.General, "SpawnpointFloodLimitPeds", spawnpointFloodLimitPeds);
-        spawnpointFloodLimitDistance = config.GetValue<float>(SettingsHeader.General, "SpawnpointFloodLimitDistance", spawnpointFloodLimitDistance);
-        idleInterval = config.GetValue<int>(SettingsHeader.General, "IdleInterval", idleInterval);
-        battleInterval = config.GetValue<int>(SettingsHeader.General, "BattleInterval", battleInterval);
+        maxPedsPerTeam = config.GetValue(SettingsHeader.General, "MaxPedsPerTeam", maxPedsPerTeam);
+        noWantedLevel = config.GetValue(SettingsHeader.General, "NoWantedLevel", noWantedLevel);
+        showBlipsOnPeds = config.GetValue(SettingsHeader.General, "ShowBlipsOnPeds", showBlipsOnPeds);
+        dropWeaponOnDead = config.GetValue(SettingsHeader.General, "DropWeaponOnDead", dropWeaponOnDead);
+        removeDeadPeds = config.GetValue(SettingsHeader.General, "RemoveDeadPeds", removeDeadPeds);
+        runToSpawnpoint = config.GetValue(SettingsHeader.General, "RunToSpawnpoint", runToSpawnpoint);
+        processOtherRelationshipGroups = config.GetValue(SettingsHeader.General, "ProcessOtherRelationshipGroups", processOtherRelationshipGroups);
+        neutralPlayer = config.GetValue(SettingsHeader.General, "NeutralPlayer", neutralPlayer);
+        spawnpointFloodLimitPeds = config.GetValue(SettingsHeader.General, "SpawnpointFloodLimitPeds", spawnpointFloodLimitPeds);
+        spawnpointFloodLimitDistance = config.GetValue(SettingsHeader.General, "SpawnpointFloodLimitDistance", spawnpointFloodLimitDistance);
+        idleInterval = config.GetValue(SettingsHeader.General, "IdleInterval", idleInterval);
+        battleInterval = config.GetValue(SettingsHeader.General, "BattleInterval", battleInterval);
 
-        maxPedsAllies = config.GetValue<int>(SettingsHeader.Allies, "MaxPeds", maxPedsPerTeam);
-        maxPedsEnemies = config.GetValue<int>(SettingsHeader.Enemies, "MaxPeds", maxPedsPerTeam);
+        maxPedsAllies = config.GetValue(SettingsHeader.Allies, "MaxPeds", maxPedsPerTeam);
+        maxPedsEnemies = config.GetValue(SettingsHeader.Enemies, "MaxPeds", maxPedsPerTeam);
+        maxSpawnPedsAllies = config.GetValue(SettingsHeader.Allies, "MaxSpawnPeds", maxSpawnPedsAllies);
+        maxSpawnPedsEnemies = config.GetValue(SettingsHeader.Enemies, "MaxSpawnPeds", maxSpawnPedsEnemies);
 
         relationshipGroupAllies = World.AddRelationshipGroup("simplegangwar_allies");
         relationshipGroupEnemies = World.AddRelationshipGroup("simplegangwar_enemies");
@@ -257,6 +264,8 @@ public class SimpleGangWar : Script {
     private void SetupBattle() {
         Interval = battleInterval;
         spawnpointsDistance = spawnpointEnemies.DistanceTo(spawnpointAllies);
+        spawnedAlliesCounter = 0;
+        spawnedEnemiesCounter = 0;
 
         if (noWantedLevel) {
             originalWantedLevel = Game.MaxWantedLevel;
@@ -281,9 +290,14 @@ public class SimpleGangWar : Script {
     private bool CanPedsSpawn(bool alliedTeam) {
         List<Ped> spawnedPedsList = alliedTeam ? spawnedAllies : spawnedEnemies;
         int maxPeds = alliedTeam ? maxPedsAllies : maxPedsEnemies;
+        int maxSpawnPeds = alliedTeam ? maxSpawnPedsAllies : maxSpawnPedsEnemies;
+        int totalSpawnedPeds = alliedTeam ? spawnedAlliesCounter : spawnedEnemiesCounter;
 
         // by MaxPeds in the team
         if (spawnedPedsList.Count >= maxPeds) return false;
+
+        // by MaxSpawnPeds limit
+        if (maxSpawnPeds >= 0 && totalSpawnedPeds > maxSpawnPeds) return false;
 
         // by SpawnpointFlood limit
         if (spawnpointFloodLimitPeds < 1) return true;
@@ -306,16 +320,16 @@ public class SimpleGangWar : Script {
     /// <returns>The spawned ped</returns>
     private Ped SpawnRandomPed(bool alliedTeam) {
         Vector3 pedPosition = alliedTeam ? spawnpointAllies : spawnpointEnemies;
-        string pedName = RandomChoice<string>(alliedTeam ? pedsAllies : pedsEnemies);
-        string weaponName = RandomChoice<string>(alliedTeam ? weaponsAllies : weaponsEnemies);
+        string pedName = RandomChoice(alliedTeam ? pedsAllies : pedsEnemies);
+        string weaponName = RandomChoice(alliedTeam ? weaponsAllies : weaponsEnemies);
         PedHash pedSpawn;
         WeaponHash weaponGive;
 
         // TODO verify names from arrays on script startup
-        if (!Enum.TryParse<PedHash>(pedName, true, out pedSpawn)) {
+        if (!Enum.TryParse(pedName, true, out pedSpawn)) {
             throw new FormatException("Ped name " + pedName + " does not exist!");
         }
-        if (!Enum.TryParse<WeaponHash>(weaponName, true, out weaponGive)) {
+        if (!Enum.TryParse(weaponName, true, out weaponGive)) {
             throw new FormatException("Weapon name " + weaponName + " does not exist!");
         }
 
@@ -355,7 +369,14 @@ public class SimpleGangWar : Script {
 
         ped.Task.ClearAllImmediately();
         ped.AlwaysKeepTask = true;  // TODO Investigate if this could be making peds avoid reloads
-        (alliedTeam ? spawnedAllies : spawnedEnemies).Add(ped);
+
+        if (alliedTeam) {
+            spawnedAllies.Add(ped);
+            spawnedAlliesCounter++;
+        } else {
+            spawnedEnemies.Add(ped);
+            spawnedEnemiesCounter++;
+        }
 
         return ped;
     }
@@ -505,7 +526,7 @@ public class SimpleGangWar : Script {
     /// <returns>The chosen enum option</returns>
     private EnumType EnumParse<EnumType>(string enumKey, EnumType defaultValue) where EnumType : struct {
         EnumType returnValue;
-        if (!Enum.TryParse<EnumType>(enumKey, true, out returnValue)) returnValue = defaultValue;
+        if (!Enum.TryParse(enumKey, true, out returnValue)) returnValue = defaultValue;
         return returnValue;
     }
 
