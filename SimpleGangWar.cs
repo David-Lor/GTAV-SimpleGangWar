@@ -38,6 +38,7 @@ public class SimpleGangWar : Script {
     private static bool removeDeadPeds = true;
     private static bool runToSpawnpoint = true;
     private static bool processOtherRelationshipGroups = false;
+    private static bool neutralPlayer = false;
     private static int spawnpointFloodLimitPeds = 10;
     private static float spawnpointFloodLimitDistance = 8.0f;
     private static int idleInterval = 500;
@@ -164,6 +165,7 @@ public class SimpleGangWar : Script {
         removeDeadPeds = config.GetValue(SettingsHeader.General, "RemoveDeadPeds", removeDeadPeds);
         runToSpawnpoint = config.GetValue(SettingsHeader.General, "RunToSpawnpoint", runToSpawnpoint);
         processOtherRelationshipGroups = config.GetValue(SettingsHeader.General, "ProcessOtherRelationshipGroups", processOtherRelationshipGroups);
+        neutralPlayer = config.GetValue(SettingsHeader.General, "NeutralPlayer", neutralPlayer);
         spawnpointFloodLimitPeds = config.GetValue(SettingsHeader.General, "SpawnpointFloodLimitPeds", spawnpointFloodLimitPeds);
         spawnpointFloodLimitDistance = config.GetValue(SettingsHeader.General, "SpawnpointFloodLimitDistance", spawnpointFloodLimitDistance);
         idleInterval = config.GetValue(SettingsHeader.General, "IdleInterval", idleInterval);
@@ -181,7 +183,11 @@ public class SimpleGangWar : Script {
         SetRelationshipBetweenGroups(Relationship.Respect, relationshipGroupAllies, relationshipGroupAllies);
         SetRelationshipBetweenGroups(Relationship.Respect, relationshipGroupEnemies, relationshipGroupEnemies);
         SetRelationshipBetweenGroups(Relationship.Respect, relationshipGroupAllies, relationshipGroupPlayer);
-        SetRelationshipBetweenGroups(Relationship.Hate, relationshipGroupEnemies, relationshipGroupPlayer);
+        if (!neutralPlayer) {
+            SetRelationshipBetweenGroups(Relationship.Hate, relationshipGroupEnemies, relationshipGroupPlayer);
+        } else {
+            SetRelationshipBetweenGroups(Relationship.Respect, relationshipGroupEnemies, relationshipGroupPlayer);
+        }
         // TODO processedRelationshipGroups not being used?
         processedRelationshipGroups.Add(relationshipGroupPlayer);
         processedRelationshipGroups.Add(relationshipGroupAllies);
