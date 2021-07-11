@@ -19,7 +19,7 @@ jobs:
           python-version: 3.7
           architecture: x64
       - name: Install Python requirements
-        run: python -m pip install -r .github/workflows/extract_changelog_requirements.txt
+        run: "python -m pip install -r .github/workflows/release/extract_changelog_requirements.txt"
 
       # Fetch variables
       - name: Extract version from tag
@@ -27,7 +27,7 @@ jobs:
         run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
       - name: Fetch changelog for release description
         id: get_changelog
-        run: "python .github/workflows/extract_changelog.py ${{ steps.get_version.outputs.VERSION }}"
+        run: "python .github/workflows/release/extract_changelog.py ${{ steps.get_version.outputs.VERSION }}"
 
       # Generate artifact
       - name: Create release artifact (zip)
