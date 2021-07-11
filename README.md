@@ -50,7 +50,8 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 	- `far`
 	- `disabled`: do not alter this setting on peds
 	- `random`: randomize between `near`, `medium`, `far` for each spawned ped
-- `MaxPeds`: maximum alive peds on the team (if not specified, the MaxPedsPerTeam setting will be used)
+- `MaxPeds`: maximum alive peds on the team at the same time (if not specified, the MaxPedsPerTeam setting will be used).
+- `MaxSpawnPeds`: limit of peds that will spawn. When the limit is reached, no more peds on the team will spawn on the current battle. Can be disabled by removing the setting or setting it to -1.
 
 ### SETTINGS
 
@@ -66,6 +67,8 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
   The task FightAgainstHatedTargets (false) can be interesting when spawnpoints are closer, as peds might have more freedom to flank the enemy?
 - `ProcessOtherRelationshipGroups`: if true, get all relationship groups from other existing peds and match these groups with the groups of SimpleGangWar peds.
   Set it to true if you experience the spawned peds fighting against other peds (like mission peds) when they should not be (for example, enemy peds of a mission fighting against enemy peds of SimpleGangWar).
+- `NeutralPlayer`: if true, the player won't be considered an enemy of the enemy faction (it will virtually be ignored), which can be useful for freecam-like mods.
+  The enemies cannot be attacked by the player with this setting enabled, and it may interfere with ProcessOtherRelationshipGroups.
 - `SpawnpointFloodLimitPeds`: limit how many peds can be near its spawnpoint. If more than this quantity of peds are near the spawnpoint, no more peds on the team will spawn. Disable this feature by setting this variable to `0`.
 - `SpawnpointFloodLimitDistance`: in-game distance from a team spawnpoint to keep track of the SpawnpointFloodLimitPeds. Can be integer or decimal (if using decimals, use dot or comma depending on your system regional settings)
 - `IdleInterval`: delay between loop runs, when battle is not running, in ms
@@ -88,6 +91,9 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 
 ## Changelog
 
+- 2.3.1
+	- Add option to limit how many peds spawn per team
+	- Add NeutralPlayer setting
 - 2.2.1
 	- Add spawnpoint anti-flood feature (avoid peds from flooding their spawnpoints)
 	- Add options to randomize CombatMovement & CombatRange
