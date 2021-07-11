@@ -91,7 +91,7 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 
 ## Changelog
 
-- 2.3.2
+- 2.3.3
 	- Add option to limit how many peds spawn per team
 	- Add NeutralPlayer setting
 - 2.2.1
