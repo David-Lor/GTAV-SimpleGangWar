@@ -32,8 +32,8 @@ Settings can be defined on the `SimpleGangWar.ini` file, being the following:
 
 _All lists of items (models & weapons) are separated by comma (`,`) or semi-colon (`;`). Spaces and case ignored._
 
-- `Models`: list of ped models ([Reference](https://github.com/crosire/scripthookvdotnet/blob/d1827497495567d810986aa752f8d903853088fd/source/scripting_v2/GTA.Native/PedHash.cs) | [Reference with pics (use the names on the other link)](https://docs.fivem.net/docs/game-references/ped-models))
-- `Weapons`: list of ped weapons ([Reference](https://github.com/crosire/scripthookvdotnet/blob/d1827497495567d810986aa752f8d903853088fd/source/scripting_v2/GTA.Native/WeaponHash.cs))
+- `Models`: list of ped models ([Reference](https://github.com/crosire/scripthookvdotnet/blob/main/source/scripting_v2/GTA.Native/PedHash.cs) | [Reference with pics (use the names on the other link)](https://docs.fivem.net/docs/game-references/ped-models)) (Example: `CartelGuards01GMM`)
+- `Weapons`: list of ped weapons ([Reference](https://github.com/crosire/scripthookvdotnet/blob/main/source/scripting_v2/GTA.Native/WeaponHash.cs)) (Example: `CarbineRifleMk2`)
 - `Health`: health for peds (should not be least than 100)
 - `Armor`: armor for peds (from 0)
 - `Accuracy`: accuracy for peds (from 0)
