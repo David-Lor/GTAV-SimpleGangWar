@@ -3,5 +3,5 @@ obj/
 .vs/
 *.csproj
 *.config
-*.sln
+*.sln*
 .idea/
