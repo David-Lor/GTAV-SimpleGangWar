@@ -50,8 +50,10 @@ public class SimpleGangWar : Script {
 
     // From here, internal script variables - do not change!
 
-    private int relationshipGroupAllies;
-    private int relationshipGroupEnemies;
+    private ScriptSettings config;
+
+    private RelationshipGroup relationshipGroupAllies;
+    private RelationshipGroup relationshipGroupEnemies;
     private int originalWantedLevel;
 
     private int spawnedAlliesCounter;
@@ -61,7 +63,7 @@ public class SimpleGangWar : Script {
     private List<Ped> spawnedEnemies = new List<Ped>();
     private List<Ped> deadPeds = new List<Ped>();
     private List<Ped> pedsRemove = new List<Ped>();
-    private List<int> processedRelationshipGroups = new List<int>();
+    private List<RelationshipGroup> processedRelationshipGroups = new List<RelationshipGroup>();
 
     private bool spawnEnabled = true;
     private Stage stage = Stage.Initial;
@@ -76,7 +78,7 @@ public class SimpleGangWar : Script {
     private static Relationship[] allyRelationships = { Relationship.Companion, Relationship.Like, Relationship.Respect };
     private static Relationship[] enemyRelationships = { Relationship.Hate, Relationship.Dislike };
     
-    private int relationshipGroupPlayer;
+    private RelationshipGroup relationshipGroupPlayer;
     private static Random random;
 
     private enum CombatMovement {
@@ -115,14 +117,101 @@ public class SimpleGangWar : Script {
         public static readonly string General = "SETTINGS";
     }
 
-
     public SimpleGangWar() {
         Tick += MainLoop;
         KeyUp += OnKeyUp;
         Interval = idleInterval;
 
-        ScriptSettings config = ScriptSettings.Load("scripts\\SimpleGangWar.ini");
-        string configString;
+        LoadSettings();
+        hotkey = EnumParse(config.GetValue<string>(SettingsHeader.General, "Hotkey", ""), hotkey);
+        spawnHotkey = EnumParse(config.GetValue<string>(SettingsHeader.General, "SpawnHotkey", ""), spawnHotkey);
+
+        relationshipGroupAllies = World.AddRelationshipGroup("simplegangwar_allies");
+        relationshipGroupEnemies = World.AddRelationshipGroup("simplegangwar_enemies");
+        relationshipGroupPlayer = Game.Player.Character.RelationshipGroup;
+
+        // TODO processedRelationshipGroups not being used?
+        processedRelationshipGroups.Add(relationshipGroupPlayer);
+        processedRelationshipGroups.Add(relationshipGroupAllies);
+        processedRelationshipGroups.Add(relationshipGroupEnemies);
+
+        random = new Random();
+
+        GTA.UI.Screen.ShowHelpText("SimpleGangWar loaded");
+    }
+
+
+    /// <summary>
+    /// The main script loop runs at the frequency delimited by the Interval, which varies depending if the battle is running or not.
+    /// The loop only spawn peds and processes them as the battle is running. Any other actions that happen outside a battle are processed by Key event handlers.
+    /// </summary>
+    private void MainLoop(object sender, EventArgs e) {
+        if (stage >= Stage.Running) {
+            try {
+                SpawnPeds(true);
+                SpawnPeds(false);
+
+                SetUnmanagedPedsInRelationshipGroups();
+                ProcessSpawnedPeds(true);
+                ProcessSpawnedPeds(false);
+            } catch (FormatException exception) {
+                GTA.UI.Screen.ShowSubtitle("(SimpleGangWar) Error! " + exception.Message);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// Key event handler for key releases.
+    /// </summary>
+    private void OnKeyUp(object sender, KeyEventArgs e) {
+        if (e.KeyCode == hotkey) {
+            switch (stage) {
+                case Stage.Initial:
+                    ParseSettings();
+                    GTA.UI.Screen.ShowHelpText("Welcome to SimpleGangWar!\nGo to the enemy spawnpoint and press the hotkey again to define it.", 180000, true);
+                    stage = Stage.DefiningEnemySpawnpoint;
+                    break;
+                case Stage.DefiningEnemySpawnpoint:
+                    DefineSpawnpoint(false);
+                    GTA.UI.Screen.ShowHelpText("Enemy spawnpoint defined! Now go to the allied spawnpoint and press the hotkey again to define it.", 180000, true);
+                    stage = Stage.EnemySpawnpointDefined;
+                    break;
+                case Stage.EnemySpawnpointDefined:
+                    DefineSpawnpoint(true);
+                    SetupBattle();
+                    GTA.UI.Screen.ShowHelpText("The battle begins NOW!", 5000, true);
+                    stage = Stage.Running;
+                    break;
+                case Stage.Running:
+                    GTA.UI.Screen.ShowHelpText("Do you really want to stop the battle? Press the hotkey again to confirm.", 7000, true);
+                    stage = Stage.StopKeyPressed;
+                    break;
+                case Stage.StopKeyPressed:
+                    GTA.UI.Screen.ShowHelpText("The battle has ended!", 5000, true);
+                    stage = Stage.Initial;
+                    Teardown();
+                    break;
+            }
+        } else if (e.KeyCode == spawnHotkey) {
+            spawnEnabled = !spawnEnabled;
+            BlinkSpawnpoint(true);
+            BlinkSpawnpoint(false);
+        }
+    }
+
+    /// <summary>
+    /// Load settings from the .ini file
+    /// </summary>
+    private void LoadSettings() {
+        config = ScriptSettings.Load("scripts\\SimpleGangWar.ini");
+    }
+
+    /// <summary>
+    /// Load most of the script settings. This is executed on the first stage of the script (first press of the main hotkey)
+    /// </summary>
+    private void ParseSettings() {
+        LoadSettings();
 
         healthAllies = config.GetValue(SettingsHeader.Allies, "Health", healthAllies);
         healthEnemies = config.GetValue(SettingsHeader.Enemies, "Health", healthEnemies);
@@ -132,31 +221,18 @@ public class SimpleGangWar : Script {
 
         accuracyAllies = config.GetValue(SettingsHeader.Allies, "Accuracy", accuracyAllies);
         accuracyEnemies = config.GetValue(SettingsHeader.Enemies, "Accuracy", accuracyEnemies);
-        
-        configString = config.GetValue<string>(SettingsHeader.Allies, "CombatMovement", "");
-        combatMovementAllies = EnumParse(configString, combatMovementAllies);
-        configString = config.GetValue<string>(SettingsHeader.Enemies, "CombatMovement", "");
-        combatMovementEnemies = EnumParse(configString, combatMovementEnemies);
 
-        configString = config.GetValue<string>(SettingsHeader.Allies, "CombatRange", "");
-        combatRangeAllies = EnumParse(configString, combatRangeAllies);
-        configString = config.GetValue<string>(SettingsHeader.Enemies, "CombatRange", "");
-        combatRangeEnemies = EnumParse(configString, combatRangeEnemies);
+        combatMovementAllies = EnumParse(config.GetValue(SettingsHeader.Allies, "CombatMovement", ""), combatMovementAllies);
+        combatMovementEnemies = EnumParse(config.GetValue<string>(SettingsHeader.Enemies, "CombatMovement", ""), combatMovementEnemies);
 
-        configString = config.GetValue<string>(SettingsHeader.Allies, "Weapons", "");
-        weaponsAllies = ArrayParse(configString, weaponsAllies);
-        configString = config.GetValue<string>(SettingsHeader.Enemies, "Weapons", "");
-        weaponsEnemies = ArrayParse(configString, weaponsEnemies);
+        combatRangeAllies = EnumParse(config.GetValue(SettingsHeader.Allies, "CombatRange", ""), combatRangeAllies);
+        combatRangeEnemies = EnumParse(config.GetValue(SettingsHeader.Enemies, "CombatRange", ""), combatRangeEnemies);
 
-        configString = config.GetValue<string>(SettingsHeader.Allies, "Models", "");
-        pedsAllies = ArrayParse(configString, pedsAllies);
-        configString = config.GetValue<string>(SettingsHeader.Enemies, "Models", "");
-        pedsEnemies = ArrayParse(configString, pedsEnemies);
+        weaponsAllies = ArrayParse(config.GetValue(SettingsHeader.Allies, "Weapons", ""), weaponsAllies);
+        weaponsEnemies = ArrayParse(config.GetValue(SettingsHeader.Enemies, "Weapons", ""), weaponsEnemies);
 
-        configString = config.GetValue<string>(SettingsHeader.General, "Hotkey", "");
-        hotkey = EnumParse(configString, hotkey);
-        configString = config.GetValue<string>(SettingsHeader.General, "SpawnHotkey", "");
-        spawnHotkey = EnumParse(configString, spawnHotkey);
+        pedsAllies = ArrayParse(config.GetValue(SettingsHeader.Allies, "Models", ""), pedsAllies);
+        pedsEnemies = ArrayParse(config.GetValue(SettingsHeader.Enemies, "Models", ""), pedsEnemies);
 
         maxPedsPerTeam = config.GetValue(SettingsHeader.General, "MaxPedsPerTeam", maxPedsPerTeam);
         noWantedLevel = config.GetValue(SettingsHeader.General, "NoWantedLevel", noWantedLevel);
@@ -176,9 +252,6 @@ public class SimpleGangWar : Script {
         maxSpawnPedsAllies = config.GetValue(SettingsHeader.Allies, "MaxSpawnPeds", maxSpawnPedsAllies);
         maxSpawnPedsEnemies = config.GetValue(SettingsHeader.Enemies, "MaxSpawnPeds", maxSpawnPedsEnemies);
 
-        relationshipGroupAllies = World.AddRelationshipGroup("simplegangwar_allies");
-        relationshipGroupEnemies = World.AddRelationshipGroup("simplegangwar_enemies");
-        relationshipGroupPlayer = Game.Player.Character.RelationshipGroup;
         SetRelationshipBetweenGroups(Relationship.Hate, relationshipGroupAllies, relationshipGroupEnemies);
         SetRelationshipBetweenGroups(Relationship.Respect, relationshipGroupAllies, relationshipGroupAllies);
         SetRelationshipBetweenGroups(Relationship.Respect, relationshipGroupEnemies, relationshipGroupEnemies);
@@ -188,75 +261,7 @@ public class SimpleGangWar : Script {
         } else {
             SetRelationshipBetweenGroups(Relationship.Respect, relationshipGroupEnemies, relationshipGroupPlayer);
         }
-        // TODO processedRelationshipGroups not being used?
-        processedRelationshipGroups.Add(relationshipGroupPlayer);
-        processedRelationshipGroups.Add(relationshipGroupAllies);
-        processedRelationshipGroups.Add(relationshipGroupEnemies);
-
-        random = new Random();
-
-        UI.Notify("SimpleGangWar loaded");
     }
-
-
-    /// <summary>
-    /// The main script loop runs at the frequency delimited by the Interval, which varies depending if the battle is running or not.
-    /// The loop only spawn peds and processes them as the battle is running. Any other actions that happen outside a battle are processed by Key event handlers.
-    /// </summary>
-    private void MainLoop(object sender, EventArgs e) {
-        if (stage >= Stage.Running) {
-            try {
-                SpawnPeds(true);
-                SpawnPeds(false);
-
-                SetUnmanagedPedsInRelationshipGroups();
-                ProcessSpawnedPeds(true);
-                ProcessSpawnedPeds(false);
-            } catch (FormatException exception) {
-                UI.ShowSubtitle("(SimpleGangWar) Error! " + exception.Message);
-            }
-        }
-    }
-
-
-    /// <summary>
-    /// Key event handler for key releases.
-    /// </summary>
-    private void OnKeyUp(object sender, KeyEventArgs e) {
-        if (e.KeyCode == hotkey) {
-            switch (stage) {
-                case Stage.Initial:
-                    UI.ShowHelpMessage("Welcome to SimpleGangWar!\nGo to the enemy spawnpoint and press the hotkey again to define it.", 180000, true);
-                    stage = Stage.DefiningEnemySpawnpoint;
-                    break;
-                case Stage.DefiningEnemySpawnpoint:
-                    DefineSpawnpoint(false);
-                    UI.ShowHelpMessage("Enemy spawnpoint defined! Now go to the allied spawnpoint and press the hotkey again to define it.", 180000, true);
-                    stage = Stage.EnemySpawnpointDefined;
-                    break;
-                case Stage.EnemySpawnpointDefined:
-                    DefineSpawnpoint(true);
-                    SetupBattle();
-                    UI.ShowHelpMessage("The battle begins NOW!", 5000, true);
-                    stage = Stage.Running;
-                    break;
-                case Stage.Running:
-                    UI.ShowHelpMessage("Do you really want to stop the battle? Press the hotkey again to confirm.", 7000, true);
-                    stage = Stage.StopKeyPressed;
-                    break;
-                case Stage.StopKeyPressed:
-                    UI.ShowHelpMessage("The battle has ended!", 5000, true);
-                    stage = Stage.Initial;
-                    Teardown();
-                    break;
-            }
-        } else if (e.KeyCode == spawnHotkey) {
-            spawnEnabled = !spawnEnabled;
-            BlinkSpawnpoint(true);
-            BlinkSpawnpoint(false);
-        }
-    }
-
 
     /// <summary>
     /// After the spawnpoints are defined, some tweaks are required just before the battle begins.
@@ -341,7 +346,7 @@ public class SimpleGangWar : Script {
         ped.Money = 0;
         ped.Accuracy = alliedTeam ? accuracyAllies : accuracyEnemies;
         ped.RelationshipGroup = alliedTeam ? relationshipGroupAllies : relationshipGroupEnemies;
-        ped.DropsWeaponsOnDeath = dropWeaponOnDead;
+        ped.DropsEquippedWeaponOnDeath = dropWeaponOnDead;
 
         CombatRange combatRange = alliedTeam ? combatRangeAllies : combatRangeEnemies;
         if (combatRange != CombatRange.Disabled) {
@@ -390,7 +395,7 @@ public class SimpleGangWar : Script {
 
         foreach (Ped ped in pedList) {
             if (ped.IsDead) {
-                ped.CurrentBlip.Remove();
+                ped.AttachedBlip.Delete();
                 pedsRemove.Add(ped);
                 deadPeds.Add(ped);
                 if (removeDeadPeds) ped.MarkAsNoLongerNeeded();
@@ -449,7 +454,7 @@ public class SimpleGangWar : Script {
             foreach (Ped ped in World.GetAllPeds()) {
                 if (ped.IsHuman && !ped.IsPlayer) {
                     Relationship pedRelationshipWithPlayer = ped.GetRelationshipWithPed(Game.Player.Character);
-                    int relationshipGroup = ped.RelationshipGroup;
+                    RelationshipGroup relationshipGroup = ped.RelationshipGroup;
 
                     if (relationshipGroup != relationshipGroupAllies && relationshipGroup != relationshipGroupEnemies && relationshipGroup != relationshipGroupPlayer) {
                         if (allyRelationships.Contains(pedRelationshipWithPlayer)) {
@@ -480,8 +485,8 @@ public class SimpleGangWar : Script {
     /// </summary>
     private void Teardown() {
         Interval = idleInterval;
-        spawnpointBlipAllies.Remove();
-        spawnpointBlipEnemies.Remove();
+        spawnpointBlipAllies.Delete();
+        spawnpointBlipEnemies.Delete();
 
         TeardownPeds(spawnedAllies);
         TeardownPeds(spawnedEnemies);
@@ -502,9 +507,8 @@ public class SimpleGangWar : Script {
     /// <param name="relationship">Relationship to set between the groups</param>
     /// <param name="groupA">One group</param>
     /// <param name="groupB">Other group</param>
-    private void SetRelationshipBetweenGroups(Relationship relationship, int groupA, int groupB) {
-        World.SetRelationshipBetweenGroups(relationship, groupA, groupB);
-        World.SetRelationshipBetweenGroups(relationship, groupB, groupA);
+    private void SetRelationshipBetweenGroups(Relationship relationship, RelationshipGroup groupA, RelationshipGroup groupB) {
+        groupA.SetRelationshipBetweenGroups(groupB, relationship, true);
     }
 
     /// <summary>

@@ -9,7 +9,9 @@ The focus of my script is to provide a similar simple script to create instant b
 
 ## Installing
 
-- Download and extract the required dependencies: ScriptHookV & ScriptHookVDotNet
+- Download and extract the required dependencies (as of January 2025):
+  - [ScriptHookV](http://www.dev-c.com/gtav/scripthookv/) (last tested version: 1.0.3411.0)
+  - [ScriptHookVDotNet nightly](https://github.com/scripthookvdotnet/scripthookvdotnet-nightly/releases) (last tested version: [v3.7.0-nightly.14](https://github.com/scripthookvdotnet/scripthookvdotnet-nightly/releases/tag/v3.7.0-nightly.14))
 - Download & extract `SimpleGangWar.cs` & `SimpleGangWar.ini` into `Grand Theft Auto V/scripts` folder
 
 ## Usage
@@ -32,24 +34,24 @@ Settings can be defined on the `SimpleGangWar.ini` file, being the following:
 
 _All lists of items (models & weapons) are separated by comma (`,`) or semi-colon (`;`). Spaces and case ignored._
 
-- `Models`: list of ped models ([Reference](https://github.com/crosire/scripthookvdotnet/blob/d1827497495567d810986aa752f8d903853088fd/source/scripting_v2/GTA.Native/PedHash.cs) | [Reference with pics (use the names on the other link)](https://docs.fivem.net/docs/game-references/ped-models))
-- `Weapons`: list of ped weapons ([Reference](https://github.com/crosire/scripthookvdotnet/blob/d1827497495567d810986aa752f8d903853088fd/source/scripting_v2/GTA.Native/WeaponHash.cs))
+- `Models`: list of ped models ([Reference](https://github.com/crosire/scripthookvdotnet/blob/main/source/scripting_v2/GTA.Native/PedHash.cs) | [Reference with pics (use the names on the other link)](https://docs.fivem.net/docs/game-references/ped-models)) (Example: `CartelGuards01GMM`)
+- `Weapons`: list of ped weapons ([Reference](https://github.com/crosire/scripthookvdotnet/blob/main/source/scripting_v2/GTA.Native/WeaponHash.cs)) (Example: `CarbineRifleMk2`)
 - `Health`: health for peds (should not be least than 100)
 - `Armor`: armor for peds (from 0)
 - `Accuracy`: accuracy for peds (from 0)
 - `CombatMovement`: how the peds will move through the battlefield. This can be used to make one team defend its spawnpoint, while the other team tries to attack it. If RunToSpawnpoint=true, this setting most probably will be ignored. One of following:
-	- `stationary`: not move at all
-	- `defensive`: stay near the spawnpoint and take cover
-	- `offensive`: focus on attacking the enemy team
-	- `suicidal`: more aggresive attack
-	- `disabled`: do not alter this setting on peds
-	- `random`: randomize between `defensive` and `offensive` for each spawned ped. This does not always work as expected, since some peds can be stuck on the spawnpoint waiting for other peds to attack, but since they are defending their position, nobody would attack
+    - `stationary`: not move at all
+    - `defensive`: stay near the spawnpoint and take cover
+    - `offensive`: focus on attacking the enemy team
+    - `suicidal`: more aggresive attack
+    - `disabled`: do not alter this setting on peds
+    - `random`: randomize between `defensive` and `offensive` for each spawned ped. This does not always work as expected, since some peds can be stuck on the spawnpoint waiting for other peds to attack, but since they are defending their position, nobody would attack
 - `CombatRange`: how far or close the peds will fight against their enemies. This might not have a huge difference, depending on the scenario. One of following:
-	- `near`
-	- `medium`
-	- `far`
-	- `disabled`: do not alter this setting on peds
-	- `random`: randomize between `near`, `medium`, `far` for each spawned ped
+    - `near`
+    - `medium`
+    - `far`
+    - `disabled`: do not alter this setting on peds
+    - `random`: randomize between `near`, `medium`, `far` for each spawned ped
 - `MaxPeds`: maximum alive peds on the team at the same time (if not specified, the MaxPedsPerTeam setting will be used).
 - `MaxSpawnPeds`: limit of peds that will spawn. When the limit is reached, no more peds on the team will spawn on the current battle. Can be disabled by removing the setting or setting it to -1.
 
@@ -91,34 +93,39 @@ _All lists of items (models & weapons) are separated by comma (`,`) or semi-colo
 
 ## Changelog
 
+- 2.4.1
+    - Update to game state as of January 2025:
+        - ScriptHookV 1.0.3411.0
+        - ScriptHookVDotNet nightly 3.7.0
+    - Load settings from .ini before each battle
 - 2.3.3
-	- Add option to limit how many peds spawn per team
-	- Add NeutralPlayer setting
+    - Add option to limit how many peds spawn per team
+    - Add NeutralPlayer setting
 - 2.2.1
-	- Add spawnpoint anti-flood feature (avoid peds from flooding their spawnpoints)
-	- Add options to randomize CombatMovement & CombatRange
-	- Add options to disable altering CombatMovement & CombatRange
+    - Add spawnpoint anti-flood feature (avoid peds from flooding their spawnpoints)
+    - Add options to randomize CombatMovement & CombatRange
+    - Add options to disable altering CombatMovement & CombatRange
 - 2.1.1
-	- Add CombatRange setting
-	- Add ProcessOtherRelationshipGroups setting
-	- Add IdleInterval & BattleInterval settings to .ini file (they were defined on the script but not documented on the .ini file)
-	- Add docstrings to the script functions
+    - Add CombatRange setting
+    - Add ProcessOtherRelationshipGroups setting
+    - Add IdleInterval & BattleInterval settings to .ini file (they were defined on the script but not documented on the .ini file)
+    - Add docstrings to the script functions
 - 2.0.1
-	- Pause/resume ped spawning in both teams
-	- Fix usage of default hotkeys when not specified in .ini file
-	- Rearrange variables in script
-	- Refactor README
+    - Pause/resume ped spawning in both teams
+    - Fix usage of default hotkeys when not specified in .ini file
+    - Rearrange variables in script
+    - Refactor README
 - 1.1.1
-	- Options to set ped limit per team
+    - Options to set ped limit per team
 - 1.0.1
-	- Support settings through .ini file
-	- Change if-else to switch in OnKeyUp
+    - Support settings through .ini file
+    - Change if-else to switch in OnKeyUp
 - 0.1.1
-	- Add names to blips
-	- Set health & armor to peds of each team
-	- Option to disable wanted level during gang war
-	- Option to select ped task behaviour
-	- Option to select combat movement for each team
-	- Different script Tick intervals for idle or in-battle
+    - Add names to blips
+    - Set health & armor to peds of each team
+    - Option to disable wanted level during gang war
+    - Option to select ped task behaviour
+    - Option to select combat movement for each team
+    - Different script Tick intervals for idle or in-battle
 - 0.0.1
-	- Initial release
+    - Initial release
